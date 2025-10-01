@@ -4,3 +4,4 @@ add_executable (soes-demo
   slave_objectlist.c
   )
 target_link_libraries(soes-demo LINK_PUBLIC soes)
+install (TARGETS soes-demo DESTINATION sbin)
