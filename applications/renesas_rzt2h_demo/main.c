@@ -23,7 +23,6 @@ struct _Objects Obj;
 #define LED0_OFFSET     185
 #define LED1_OFFSET     258
 #define LED2_OFFSET     55
-#define LED3_OFFSET     69
 
 #define DIPSW0_OFFSET   283
 #define DIPSW1_OFFSET   284
@@ -33,7 +32,7 @@ struct _Objects Obj;
 int epfd;
 struct epoll_event events[MAX_EVENTS];
 int uio_fd_ecat;
-struct gpiohandle_request led0, led1, led2, led3, dipsw0, dipsw1, dipsw2, dipsw3;
+struct gpiohandle_request led0, led1, led2, dipsw0, dipsw1, dipsw2, dipsw3;
 
 static int init_led_dipsw(void)
 {
@@ -72,22 +71,13 @@ static int init_led_dipsw(void)
 		goto close_led1;
 	}
 
-	led3.lineoffsets[0] = LED3_OFFSET;
-	led3.flags = GPIOHANDLE_REQUEST_OUTPUT;
-	led3.lines = 1;
-	strcpy(led3.consumer_label, "LED3");
-	if (ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &led3) < 0) {
-		printf("Error setting LED3 as GPIO %d to OUTPUT\n", LED3_OFFSET);
-		goto close_led2;
-	}
-
 	dipsw0.lineoffsets[0] = DIPSW0_OFFSET;
 	dipsw0.flags = GPIOHANDLE_REQUEST_INPUT;
 	dipsw0.lines = 1;
 	strcpy(dipsw0.consumer_label, "DIPSW0");
 	if (ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &dipsw0) < 0) {
 		printf("Error setting DIPSW0 as GPIO %d to INPUT\n", DIPSW0_OFFSET);
-		goto close_led3;
+		goto close_led2;
 	}
 
 	dipsw1.lineoffsets[0] = DIPSW1_OFFSET;
@@ -125,8 +115,6 @@ close_dipsw1:
 	close(dipsw1.fd);
 close_dipsw0:
 	close(dipsw0.fd);
-close_led3:
-	close(led2.fd);
 close_led2:
 	close(led2.fd);
 close_led1:
@@ -176,11 +164,6 @@ void setled(uint32_t value)
 		gpio_write(led2, 1);
 	else
 		gpio_write(led2, 0);
-
-	if (value & 8)
-		gpio_write(led3, 1);
-	else
-		gpio_write(led3, 0);
 }
 
 uint8_t getdipsw(void)
